@@ -6,15 +6,19 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.crisape.sqlite.entidades.Libro
 import com.crisape.sqlite.modelo.LibroDAO
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var txtTitulo: TextView
     private lateinit var txtNombre: EditText
     private lateinit var txtAutor: EditText
     private lateinit var txtAnio: EditText
     private lateinit var btnRegistrar: Button
+    private var modificar:Boolean=false
+    private var id:Int = 0
 
     val objLibro = Libro()
     val libroDAO = LibroDAO(this)
@@ -23,9 +27,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         asignarReferencias()
+        recuperarDatos()
+    }
+    private fun recuperarDatos(){
+        if (intent.hasExtra("p_id")){
+            modificar = true
+            txtTitulo.text = "Modificar Libro"
+            btnRegistrar.setText("Guardar Cambios")
+            id = intent.getIntExtra("p_id",0)
+            txtNombre.setText(intent.getStringExtra("p_nombre"))
+            txtAutor.setText(intent.getStringExtra("p_autor"))
+            txtAnio.setText(intent.getIntExtra("p_anio", 0).toString())
+        }
     }
 
     private fun asignarReferencias(){
+        txtTitulo = findViewById(R.id.txtTitulo)
         txtNombre = findViewById(R.id.txtNombre)
         txtAutor = findViewById(R.id.txtAutor)
         txtAnio = findViewById(R.id.txtAnio)
@@ -33,7 +50,12 @@ class MainActivity : AppCompatActivity() {
 
         btnRegistrar.setOnClickListener {
             if (capturarDatos()){
-                val mensaje = libroDAO.registrarLibro(objLibro)
+                var mensaje = ""
+                if (modificar == true){
+                    mensaje = libroDAO.modificarLibro(objLibro)
+                }else{
+                    libroDAO.registrarLibro(objLibro)
+                }
                 mostrarMensaje(mensaje)
             }
         }
@@ -70,6 +92,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (valida){
+            if (modificar == true){
+                objLibro.id = id
+            }
             objLibro.autor = autor
             objLibro.nombre = nombre
             objLibro.anio = anio.toInt()

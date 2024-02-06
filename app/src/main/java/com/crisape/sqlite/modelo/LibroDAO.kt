@@ -33,6 +33,49 @@ class LibroDAO(context:Context) {
         return  respuesta
     }
 
+    fun modificarLibro(libro: Libro):String{
+        var respuesta = ""
+        val db = sqliteHelper.writableDatabase
+        try {
+            val valores = ContentValues()
+            valores.put("nombre", libro.nombre)
+            valores.put("autor",libro.autor)
+            valores.put("anio",libro.anio)
+
+            var resultado = db.update("libros", valores, "id="+libro.id,null)
+            if (resultado == -1){
+                respuesta= "Error al actualizar"
+            }else{
+                respuesta= "Se actualizo correctamente"
+            }
+        }catch (e:Exception){
+            respuesta = e.message.toString()
+        }finally {
+            db.close()
+        }
+
+        return  respuesta
+    }
+
+    fun eliminarLibro(id:Int):String{
+        var respuesta = ""
+        val db = sqliteHelper.writableDatabase
+        try {
+            var resultado = db.delete("libros", "id="+id,null)
+            if (resultado == -1){
+                respuesta= "Error al eliminar"
+            }else{
+                respuesta= "Se elimino correctamente"
+            }
+        }catch (e:Exception){
+            respuesta = e.message.toString()
+        }finally {
+            db.close()
+        }
+
+        return  respuesta
+    }
+
     fun cargarLibros():ArrayList<Libro>{
         val listaLibros:ArrayList<Libro> = ArrayList()
         val query = "SELECT * FROM libros"
